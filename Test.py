@@ -1,122 +1,3 @@
-<<<<<<< HEAD
-import time
-import openpyxl
-import sys
-import csv
-import numpy as np
-import datetime as dt
-import matplotlib.pyplot as plt
-import matplotlib.dates as mdts
-import matplotlib
-
-
-
-
-def plotter(utimes, uploads, downloads):
-    conved_times = []
-    
-    dateconv = np.vectorize(dt.datetime.fromtimestamp)
-    
-    for i in utimes:
-        i = round(float(i),-1)
-        t = dateconv(i)
-        conved_times.append(str(t))
-    
-    locator = mdts.AutoDateLocator()
-    fmtter = mdts.AutoDateFormatter('%H:%M\n%a %d\n%b %y')
-    
-    fig = plt.figure()
-    ax1 = plt.subplot2grid((2,1),(0,0))
-    ax2 = plt.subplot2grid((2,1),(1,0))
-    
-    ax1.plot_date(conved_times,downloads,'r-')
-    plt.title = ("Internet Speed Report")
-    ax1.ylabel = "Download"
-    
-    ax2.plot_date(conved_times, uploads, 'r-')
-    ax2.ylabel = "Upload"
-    
-    fig.autofmt_xdate()
-    plt.show()
-    
-    
-def mainz():
-    
-
-    pcxlsx = '/home/pmb/NetSpeedLogger/results.xlsx'
-    pccsv = '/home/pmb/NetSpeedLogger/Results.csv'
-    
-    
-    wb = openpyxl.load_workbook(pcxlsx)
-    ws = wb.active
-    tme = time.strftime("%H:%M", time.gmtime())
-    date = time.strftime("%b-%d", time.gmtime())
-    unix_time = time.time()
-    day_date = time.strftime("%y%m%d")
-
-    try:
-        import speedtest as sp
-    except:
-        fail_tuple = (date, tme, 0, 0, 0, unix_time, day_date)
-        ws.append(fail_tuple)
-        wb.save(pcxlsx)
-        wb.close()
-        sys.exit(69)
-
-    try:
-#        res = sp.shell()
-#        dwn = round((res.download / 1000.0 / 1000.0), 2)
-#        up = round((res.upload / 1000.0 / 1000.0), 2)
-#        png = round(res.ping, 2)
-        
-        dwn = 9.99
-        up = 3.33
-        png = 69
-
-
-    except:
-        fail_tuple = (date, tme, 0, 0, 0, unix_time, day_date)
-        ws.append(fail_tuple)
-        wb.save(pcxlsx)
-        wb.close()
-        sys.exit()
-
-
-    results = (date, tme, dwn, up, png, unix_time, day_date)
-    
-    ws.append(results)
-    wb.save(pcxlsx)
-    wb.close()
-    
-    with open(pccsv ,'a') as csv_file:
-        csv_writer = csv.writer(csv_file, delimiter=',')
-        csv_writer.writerow(results)
-        csv_file.close()
-        
-    
-    utimes = []
-    downloads = []
-    uploads = []
-    lines=[]
-    
-    with open('/home/pmb/NetSpeedLogger/Results.csv' ,'r') as csv_file:
-        csv_reader = csv.reader(csv_file, delimiter=',')
-        next(csv_reader)
-        for line in csv_reader:
-            utimes.append(float(line[5]))
-            downloads.append(float(line[2]))
-            uploads.append(float(line[3]))
-            
-    
-    plotter(utimes,uploads,downloads)
-        
-    
-
-mainz()
-
-
-=======
-
 """
 Created on Mon Jul 30 15:34:04 2018
 
@@ -143,22 +24,24 @@ import sys
 import time
 import numpy as np
 import datetime as dt
+import gspread 
+from oauth2client.service_account import ServiceAccountCredentials
 
 system = os.uname()
 if system[1] == 'pmblaptop':
     #directory to write xlsx file
-    xlsx_direc = '/home/pmb/NetSpeedLogger/NSLResults/results.xlsx'
+    xlsx_direc = '/home/pmb/NSL/Results/results.xlsx'
     #directory to write xlsx info to csv
-    csv_direc = '/home/pmb/NetSpeedLogger/NSLResults/Results.csv'
+    csv_direc = '/home/pmb/NSL/Results/ResultsPulled.csv'
     #directory for plot format to be converted to so it can be pulled for analysis
-    plotcsv = '/home/pmb/NetSpeedLogger/NSLResults/ResultsPulled.csv'
+    plotcsv = '/home/pmb/NSL/Results/ResultsPulled.csv'
 elif system[1] == 'raspberrypi':
     #directory to write xlsx file
-    xlsx_direc = '/home/pi/NetSpeedLogger/results.xlsx'
+    xlsx_direc = '/home/pi/NSL/Results/results.xlsx'
     #directory to write xlsx info to csv
-    csv_direc = '/home/pi/NetSpeedLogger/ResultsPulled.csv'
+    csv_direc = '/home/pi/NSL/Results/ResultsPulled.csv'
     #directory for plot format to be converted to so it can be pulled for analysis
-    plotcsv = '/home/pi/NetSpeedLogger/ResultsPulled.csv'
+    plotcsv = '/home/pi/NSL/Results/ResultsPulled.csv'
 else:
     print("Not programmed for this device, set up directories")
     sys.exit(-1)
@@ -204,13 +87,30 @@ def Writer(table_line, csv_line):
         csv_writer = csv.writer(csv_file, delimiter=',')
         csv_writer.writerow(csv_line)
         csv_file.close()
+        
+        
+def GoogleSheetsLogger(table_line):
+    '''Logs bad results to google sheets document'''
+
+    scope = ['https://www.googleapis.com/auth/drive']
+    creds = ServiceAccountCredentials.from_json_keyfile_name('/home/pmb/NSL/client_secret.json',scope)
+    client = gspread.authorize(creds)
+    sheet = client.open('results').sheet1
     
+    download = table_line[2]
+    upload = table_line[3]
+    ping = table_line[4]
+    
+    if (download or upload < 8) or (ping > 80):
+        sheet.append_row(table_line)
+
 
 def mainz():
     
     currentResults = SpeedTester()
     Writer(currentResults['log_to_sheet'],currentResults['log_to_csv'])
+    GoogleSheetsLogger(currentResults['log_to_sheet'])
     
 mainz()
 
->>>>>>> 8174f6c57c2147952ab714f0e5a757adc07c3f47
+
