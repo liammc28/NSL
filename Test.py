@@ -26,6 +26,9 @@ import numpy as np
 import datetime as dt
 import gspread 
 from oauth2client.service_account import ServiceAccountCredentials
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 
 system = os.uname()
 if system[1] == 'pmblaptop':
@@ -91,26 +94,64 @@ def Writer(table_line, csv_line):
         
 def GoogleSheetsLogger(table_line):
     '''Logs bad results to google sheets document'''
+    try:
+        scope = ['https://www.googleapis.com/auth/drive']
+        creds = ServiceAccountCredentials.from_json_keyfile_name('/home/pmb/NSL/client_secret.json',scope)
+        client = gspread.authorize(creds)
+        sheet = client.open('results').sheet1
 
-    scope = ['https://www.googleapis.com/auth/drive']
-    creds = ServiceAccountCredentials.from_json_keyfile_name('/home/pmb/NSL/client_secret.json',scope)
-    client = gspread.authorize(creds)
-    sheet = client.open('results').sheet1
-    
-    download = table_line[2]
-    upload = table_line[3]
-    ping = table_line[4]
-    
-    if (download or upload < 8) or (ping > 80):
-        sheet.append_row(table_line)
+        download = table_line[2]
+        upload = table_line[3]
+        ping = table_line[4]
 
+        if (download or upload < 8) or (ping > 80):
+            sheet.append_row(table_line)
+    except:
+        print("oops!")
+
+def Emailer(table_line):
+    try:
+        
+        download = table_line[2]
+        upload = table_line[3]
+        ping = table_line[4]
+        results_tuple = (download, upload, ping)
+        
+        email_sender = 'paulmcbrien99@gmail.com'
+        email_receiver = 'paulmcbrien10@gmail.com'
+        PASSWORD = 'cotton10'
+        subject = "Internet Speed Warning"
+
+        msg = MIMEMultipart()
+        msg['From'] = email_sender
+        msg['To'] = email_receiver
+        msg['Subject'] = subject
+        msg.attach
+        body = ("Attention, the internet is not performing optimally:\n \n \tDownload is %.2fMb/s\n \tUpload is %.2fMb/s\n \tPing is %.2fms \n \n \nPlease check with your internet service provider" % (results_tuple))
+        msg.attach(MIMEText(body,'plain'))
+        text = msg.as_string()
+
+        server = smtplib.SMTP('smtp.gmail.com:587')
+        server.starttls()
+        server.login(email_sender,PASSWORD)
+        server.sendmail(email_sender,email_receiver,text)
+        #server.sendmail(email_sender,'anthonymcbrien67@gmail.com',text)
+        #server.sendmail(email_sender,'paulinemcbrien66@gmail.com',text)
+        server.quit() 
+    except:
+        print("Whoah!")
 
 def mainz():
     
     currentResults = SpeedTester()
     Writer(currentResults['log_to_sheet'],currentResults['log_to_csv'])
-    GoogleSheetsLogger(currentResults['log_to_sheet'])
     
+    dates = currentResults['log_to_sheet']
+    
+    if (dates[2] < 7.5) or (dates[3] < 7.5):
+        GoogleSheetsLogger(currentResults['log_to_sheet'])
+        Emailer(currentResults['log_to_sheet'])
+
 mainz()
 
 
