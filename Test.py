@@ -24,6 +24,8 @@ import sys
 import time
 import numpy as np
 import datetime as dt
+import gspread 
+from oauth2client.service_account import ServiceAccountCredentials
 
 system = os.uname()
 if system[1] == 'pmblaptop':
@@ -85,12 +87,29 @@ def Writer(table_line, csv_line):
         csv_writer = csv.writer(csv_file, delimiter=',')
         csv_writer.writerow(csv_line)
         csv_file.close()
+        
+        
+def GoogleSheetsLogger(table_line):
+    '''Logs bad results to google sheets document'''
+
+    scope = ['https://www.googleapis.com/auth/drive']
+    creds = ServiceAccountCredentials.from_json_keyfile_name('/home/pmb/NSL/client_secret.json',scope)
+    client = gspread.authorize(creds)
+    sheet = client.open('results').sheet1
     
+    download = table_line[2]
+    upload = table_line[3]
+    ping = table_line[4]
+    
+    if (download or upload < 8) or (ping > 80):
+        sheet.append_row(table_line)
+
 
 def mainz():
     
     currentResults = SpeedTester()
     Writer(currentResults['log_to_sheet'],currentResults['log_to_csv'])
+    GoogleSheetsLogger(currentResults['log_to_sheet'])
     
 mainz()
 
