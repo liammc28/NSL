@@ -68,10 +68,9 @@ def SpeedTester():
         #dwn = round((res.download / 1000.0 / 1000.0), 2)
         #up = round((res.upload / 1000.0 / 1000.0), 2)
         #png = round(res.ping, 2)
-	
-	dwn = 6
-	up = 10
-	png = 20
+        dwn = 6
+        up = 10
+        png = 20
 
         log_to_sheet = [date, tme, dwn, up, png]
         log_to_csv = [unix_time, dwn, up, standard_time]
