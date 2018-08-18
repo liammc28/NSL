@@ -32,6 +32,8 @@ from email.mime.multipart import MIMEMultipart
 
 system = os.uname()
 if system[1] == 'pmblaptop':
+    #directory for json gspread file
+    json_direc = '/home/pmb/NSL/client_secret.json'
     #directory to write xlsx file
     xlsx_direc = '/home/pmb/NSL/Results/results.xlsx'
     #directory to write xlsx info to csv
@@ -39,6 +41,8 @@ if system[1] == 'pmblaptop':
     #directory for plot format to be converted to so it can be pulled for analysis
     plotcsv = '/home/pmb/NSL/Results/ResultsPulled.csv'
 elif system[1] == 'raspberrypi':
+    #directory for json gspread file
+    json_direc = '/home/pi/NSL/client_secret.json'
     #directory to write xlsx file
     xlsx_direc = '/home/pi/NSL/Results/results.xlsx'
     #directory to write xlsx info to csv
@@ -100,7 +104,7 @@ def GoogleSheetsLogger(table_line):
     '''Logs bad results to google sheets document'''
     try:
         scope = ['https://www.googleapis.com/auth/drive']
-        creds = ServiceAccountCredentials.from_json_keyfile_name('/home/pmb/NSL/client_secret.json',scope)
+        creds = ServiceAccountCredentials.from_json_keyfile_name(json_direc,scope)
         client = gspread.authorize(creds)
         sheet = client.open('results').sheet1
 
