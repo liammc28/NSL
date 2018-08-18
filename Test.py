@@ -59,22 +59,20 @@ date = time.strftime("%b-%d", time.localtime())
 unix_time = time.time()
     
 def SpeedTester():
-    #attempt to import speedtest module, will log fail if fail occurs
+    attempt to import speedtest module, will log fail if fail occurs
     try:
-        #import speedtest as sp
+        import speedtest as sp
         print()
     except:
         log_to_sheet = [date, tme, 0, 0, 0]
         log_to_csv = [unix_time, 0, 0, standard_time]
 
     try:
-        #res = sp.shell()
-        #dwn = round((res.download / 1000.0 / 1000.0), 2)
-        #up = round((res.upload / 1000.0 / 1000.0), 2)
-        #png = round(res.ping, 2)
-        dwn = 6
-        up = 10
-        png = 20
+        res = sp.shell()
+        dwn = round((res.download / 1000.0 / 1000.0), 2)
+        up = round((res.upload / 1000.0 / 1000.0), 2)
+        png = round(res.ping, 2)
+     
 
         log_to_sheet = [date, tme, dwn, up, png]
         log_to_csv = [unix_time, dwn, up, standard_time]
