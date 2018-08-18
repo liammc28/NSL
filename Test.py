@@ -57,17 +57,22 @@ unix_time = time.time()
 def SpeedTester():
     #attempt to import speedtest module, will log fail if fail occurs
     try:
-        import speedtest as sp
+        #import speedtest as sp
         print()
     except:
         log_to_sheet = [date, tme, 0, 0, 0]
         log_to_csv = [unix_time, 0, 0, standard_time]
 
     try:
-        res = sp.shell()
-        dwn = round((res.download / 1000.0 / 1000.0), 2)
-        up = round((res.upload / 1000.0 / 1000.0), 2)
-        png = round(res.ping, 2)
+        #res = sp.shell()
+        #dwn = round((res.download / 1000.0 / 1000.0), 2)
+        #up = round((res.upload / 1000.0 / 1000.0), 2)
+        #png = round(res.ping, 2)
+	
+	dwn = 6
+	up = 10
+	png = 20
+
         log_to_sheet = [date, tme, dwn, up, png]
         log_to_csv = [unix_time, dwn, up, standard_time]
 
@@ -148,6 +153,8 @@ def mainz():
     
     dates = currentResults['log_to_sheet']
     
+    print(dates)
+
     if (dates[2] < 7.5) or (dates[3] < 7.5):
         GoogleSheetsLogger(currentResults['log_to_sheet'])
         Emailer(currentResults['log_to_sheet'])
