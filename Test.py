@@ -59,7 +59,7 @@ date = time.strftime("%b-%d", time.localtime())
 unix_time = time.time()
     
 def SpeedTester():
-    attempt to import speedtest module, will log fail if fail occurs
+    #attempt to import speedtest module, will log fail if fail occurs
     try:
         import speedtest as sp
         print()
@@ -141,7 +141,7 @@ def Emailer(table_line):
         server.starttls()
         server.login(email_sender,PASSWORD)
         server.sendmail(email_sender,email_receiver,text)
-        #server.sendmail(email_sender,'anthonymcbrien67@gmail.com',text)
+        server.sendmail(email_sender,'anthonymcbrien67@gmail.com',text)
         #server.sendmail(email_sender,'paulinemcbrien66@gmail.com',text)
         server.quit() 
     except:
@@ -156,7 +156,7 @@ def mainz():
     
     print(dates)
 
-    if (dates[2] < 7.5) or (dates[3] < 7.5):
+    if (dates[2] < 5) or (dates[3] < 5):
         GoogleSheetsLogger(currentResults['log_to_sheet'])
         Emailer(currentResults['log_to_sheet'])
 
