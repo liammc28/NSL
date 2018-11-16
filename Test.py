@@ -104,14 +104,11 @@ def GoogleSheetsLogger(table_line):
         scope = ['https://www.googleapis.com/auth/drive']
         creds = ServiceAccountCredentials.from_json_keyfile_name(json_direc,scope)
         client = gspread.authorize(creds)
-        sheet = client.open('results').sheet1
-
+        sheet = client.open('NSL-Duds').sheet1
         download = table_line[2]
         upload = table_line[3]
         ping = table_line[4]
-
-        if (download or upload < 8) or (ping > 80):
-            sheet.append_row(table_line)
+	sheet.append_row(table_line)
     except:
         print("oops!")
 
@@ -133,7 +130,7 @@ def Emailer(table_line):
         msg['To'] = email_receiver
         msg['Subject'] = subject
         msg.attach
-        body = ("Attention, the internet is not performing optimally:\n \n \tDownload is %.2fMb/s\n \tUpload is %.2fMb/s\n \tPing is %.2fms \n \n \nPlease check with your internet service provider" % (results_tuple))
+        body = ("Well Dad, what's the craic!\n \n \tDownload is %.2fMb/s\n \tUpload is %.2fMb/s\n \tPing is %.2fms \n \n \nPlease check with your internet service provider" % (results_tuple))
         msg.attach(MIMEText(body,'plain'))
         text = msg.as_string()
 
@@ -156,7 +153,7 @@ def mainz():
     
     print(dates)
 
-    if (dates[2] < 5) or (dates[3] < 5):
+    if (dates[2] < 3) or (dates[3] < 3):
         GoogleSheetsLogger(currentResults['log_to_sheet'])
         Emailer(currentResults['log_to_sheet'])
 
