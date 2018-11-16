@@ -108,7 +108,7 @@ def GoogleSheetsLogger(table_line):
         download = table_line[2]
         upload = table_line[3]
         ping = table_line[4]
-	    sheet.append_row(table_line)
+        sheet.append_row(table_line)
     except:
         print("oops!")
 
